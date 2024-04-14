@@ -52,8 +52,9 @@ This project implements a comprehensive Health and Fitness Club Management Syste
 
 
 ### Contributions
-- Member 1: Implemented user registration and dashboard display.
-- Member 2: Set up the database and handled administrative functionalities.
+- Abdullah: Backend
+- Member 2: Frontend
+- Remainder of work was shared.
 
 ### Contact
 - Abdullah Soboh - abdullahsoboh@cmail.carleton.ca
