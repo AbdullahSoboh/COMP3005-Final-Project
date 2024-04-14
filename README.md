@@ -53,7 +53,7 @@ This project implements a comprehensive Health and Fitness Club Management Syste
 
 ### Contributions
 - Abdullah: Backend
-- Member 2: Frontend
+- Imann: Frontend
 - Remainder of work was shared.
 
 ### Contact
