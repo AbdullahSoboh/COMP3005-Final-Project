@@ -31,7 +31,7 @@ This project implements a comprehensive Health and Fitness Club Management Syste
 ### Technical Implementation
 - **Database**: PostgreSQL
 - **Backend**: Python with `psycopg2`
-- **Frontend**: Imann Fill out
+- **Frontend**: React, implemented with Axios for API calls and React Router for navigation.
 
 ### Repository Structure
 - `/SQL`: Contains DDL and DML SQL files for database setup and sample data insertion.
@@ -40,10 +40,11 @@ This project implements a comprehensive Health and Fitness Club Management Syste
 ### Usage
 1. **Database Setup**: Execute the DDL script (`/SQL/ddl.sql`) in PostgreSQL to set up the database schema.
 2. **Insert Sample Data**: Run the DML script (`/SQL/dml.sql`) to populate the database with sample data.
-3. **Run Application**: Imann fill out
+3. **Run Application**: Start the backend server using python app.py in the backend directory.
+   Then, in the frontend directory, run npm start to launch the React application.
 
 ### Bonus Features Added
-- Complete frontend added using (Imann fill out)
+- Complete frontend added using React, styled with Bootstrap for a responsive design and better user experience.
 - Extensive Member Achievments, and Health Stats added
 
 ### Video Demonstration
@@ -56,5 +57,5 @@ This project implements a comprehensive Health and Fitness Club Management Syste
 
 ### Contact
 - Abdullah Soboh - abdullahsoboh@cmail.carleton.ca
-- Imann
+- Imann Brar - Imannbrar@cmail.carleton.ca
 
