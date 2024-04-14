@@ -48,7 +48,7 @@ This project implements a comprehensive Health and Fitness Club Management Syste
 - Extensive Member Achievments, and Health Stats added
 
 ### Video Demonstration
-- The video demonstrates each functionality and the code structure. Find the video at [YouTube link].
+- The video demonstrates each functionality and the code structure. Find the video at [[YouTube link](https://youtu.be/y7CT8O9qvMs)].
 
 
 ### Contributions
