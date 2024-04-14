@@ -3,22 +3,23 @@ import json
 from datetime import datetime
 from psycopg2 import sql
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from flask import jsonify
+
 
 def connect_db():
-    #Connecting to the datebase
+    # Connecting to the datebase
     try:
         conn = psycopg2.connect(
             dbname='FinalProject',
             user='postgres',
-            password='abood',
-            host='localhost' 
+            password='dollar25A',
+            host='localhost'
         )
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         return conn
     except Exception as e:
         print(f"Error connecting to the database: {e}")
         return None
-
 
 
 def register_member(first_name, last_name, email, date_of_birth, gender, fitness_goal):
@@ -36,6 +37,7 @@ def register_member(first_name, last_name, email, date_of_birth, gender, fitness
         finally:
             conn.close()
 
+
 def update_member_profile(member_id, first_name, last_name, email, fitness_goal):
     conn = connect_db()
     if conn is not None:
@@ -51,6 +53,7 @@ def update_member_profile(member_id, first_name, last_name, email, fitness_goal)
             print(f"Failed to update member profile: {e}")
         finally:
             conn.close()
+
 
 def display_member_dashboard(member_id):
     conn = connect_db()
@@ -91,14 +94,14 @@ def display_member_dashboard(member_id):
                 print(f"{'Recorded Date':<15} {'Weight (kg)':<12} {'Heart Rate':<12} {'Other Metrics':<20}")
                 for stat in health_stats:
                     date, weight, heart_rate, other_metrics = stat
-                    other_metrics_display = ', '.join([f"{key}: {value}" for key, value in other_metrics.items()]) if other_metrics else ''
+                    other_metrics_display = ', '.join(
+                        [f"{key}: {value}" for key, value in other_metrics.items()]) if other_metrics else ''
                     print(f"{date:%Y-%m-%d:<15} {weight:<12.2f} {heart_rate:<12} {other_metrics_display:<20}")
-                
+
         except psycopg2.Error as e:
             print(f"Failed to retrieve dashboard data: {e}")
         finally:
             conn.close()
-
 
 
 def book_personal_training_session(member_id, trainer_id, room_id, scheduled_time):
@@ -132,6 +135,7 @@ def register_for_class(member_id, class_id):
         finally:
             conn.close()
 
+
 def update_trainer_availability(trainer_id, available_times_json):
     conn = connect_db()
     if conn is not None:
@@ -147,6 +151,7 @@ def update_trainer_availability(trainer_id, available_times_json):
             print(f"Failed to update trainer availability: {e}")
         finally:
             conn.close()
+
 
 def view_member_profile_by_name(search_name):
     conn = connect_db()
@@ -168,50 +173,42 @@ def view_member_profile_by_name(search_name):
     else:
         print("Failed to connect to the database.")
 
-    
 
 def check_trainer_availability(trainer_id, requested_day, requested_time):
     conn = connect_db()
-    if conn is not None:
-        try:
-            with conn.cursor() as cursor:
-                # Retrieve the trainer's availability schedule from the database
-                cursor.execute("SELECT AvailableTimes FROM Trainers WHERE TrainerID = %s;", (trainer_id,))
-                result = cursor.fetchone()
-                if result:
-                    available_times = result[0]  # Assuming the data is already a Python dictionary
+    if conn is None:
+        return jsonify({'error': 'Failed to connect to the database'}), 500
 
-                    # Check if the trainer has availability on the requested day
-                    if requested_day in available_times:
-                        # Iterate over each time interval for that day
-                        for interval in available_times[requested_day]:
-                            start_time, end_time = interval.split('-')
-                            # Parse times to datetime objects for comparison
-                            requested_dt = datetime.strptime(requested_time, "%H:%M")
-                            start_dt = datetime.strptime(start_time, "%H:%M")
-                            end_dt = datetime.strptime(end_time, "%H:%M")
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT AvailableTimes FROM Trainers WHERE TrainerID = %s;", (trainer_id,))
+            result = cursor.fetchone()
+            if not result:
+                return jsonify({'error': 'No availability data found for the trainer'}), 404
 
-                            if start_dt <= requested_dt < end_dt:
-                                print(f"Trainer {trainer_id} is available from {start_time} to {end_time} on {requested_day}.")
-                                return True
-                        print(f"Trainer {trainer_id} is not available at {requested_time} on {requested_day}.")
-                    else:
-                        print(f"Trainer {trainer_id} does not work on {requested_day}.")
-                return False
-        except psycopg2.Error as e:
-            print(f"Error checking trainer availability: {e}")
-            return False
-        finally:
-            conn.close()
-    else:
-        print("Failed to connect to the database.")
-    return False
+            available_times = result[0]  # This should be a JSON or dictionary
+            if requested_day not in available_times:
+                return jsonify({'available': False, 'message': f'Trainer {trainer_id} does not work on {requested_day}.'}), 200
+
+            for interval in available_times[requested_day]:
+                start_time, end_time = interval.split('-')
+                requested_dt = datetime.strptime(requested_time, "%H:%M")
+                start_dt = datetime.strptime(start_time, "%H:%M")
+                end_dt = datetime.strptime(end_time, "%H:%M")
+
+                if start_dt <= requested_dt < end_dt:
+                    return jsonify({'available': True, 'message': f'Trainer {trainer_id} is available from {start_time} to {end_time} on {requested_day}.'}), 200
+
+            return jsonify({'available': False, 'message': f'Trainer {trainer_id} is not available at {requested_time} on {requested_day}.'}), 200
+
+    except psycopg2.Error as e:
+        return jsonify({'error': f'Error checking trainer availability: {str(e)}'}), 400
+    finally:
+        conn.close()
 
 def process_payment(member_id, amount_due):
     # This function would interface with a payment processing service in a real application
     print(f"Processed payment for Member ID {member_id}: ${amount_due} has been successfully charged.")
-
-
 
 
 def update_room_booking(room_id, new_capacity):
@@ -247,6 +244,7 @@ def update_equipment_maintenance(equipment_id, new_maintenance_date):
         finally:
             conn.close()
 
+
 def update_class_schedule(class_id, new_schedule):
     conn = connect_db()
     if conn is not None:
@@ -263,6 +261,7 @@ def update_class_schedule(class_id, new_schedule):
         finally:
             conn.close()
 
+
 if __name__ == "__main__":
     # Test connection to the database
     if connect_db() is not None:
@@ -278,7 +277,7 @@ if __name__ == "__main__":
         fitness_goal="Improve Fitness"
     )
 
-    #Test updating member profile
+    # Test updating member profile
     update_member_profile(
         member_id=1,  # 1 MUST BE a valid MemberID
         first_name="Emily",
@@ -291,7 +290,7 @@ if __name__ == "__main__":
     book_personal_training_session(
         member_id=1,
         trainer_id=1,  # 1 is a valid TrainerID
-        room_id=1,    # 1 is a valid RoomID
+        room_id=1,  # 1 is a valid RoomID
         scheduled_time="2024-06-15 10:00:00"
     )
 
@@ -330,10 +329,9 @@ if __name__ == "__main__":
         member_id=1
     )
 
-    
     trainer_id = 1
     requested_day = 'Tuesday'  # Specify the day of the week
-    requested_time = '08:00'   # Specify the exact time to check for availability
+    requested_time = '08:00'  # Specify the exact time to check for availability
     check_trainer_availability(trainer_id, requested_day, requested_time)
     # Test viewing member profiles by name
     search_name = "Emily"  # Example name
